@@ -1,0 +1,97 @@
+server:
+  port: 8089
+spring:
+  application:
+    name: cloud-gateway
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages
+#  cloud:
+#    loadbalancer:
+#      retry:
+#        enabled: true
+#    gateway:
+#      discovery:
+#        locator:
+#          lower-case-service-id: true
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: true
+    circuitbreaker.resilience4j.enabled: false
+    gateway:
+      #全局http超时
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 5s
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            exposedHeaders: "Content-Disposition,Content-Type,Cache-Control"
+      discovery:
+        locator:
+          lower-case-service-id: true
+    nacos:
+      discovery:
+        # if use Nacos discovery set this flag to true
+        enabled: true #use Nacos Discovery? (default:false)
+        # need replace
+        server-addr: 10.15.11.3:8848/ #please input the nacos discovery server-addr (default:localhost:8848)
+        namespace: null #please input the nacos config type (default:null)
+        group: DEFAULT_GROUP #please input the nacos discovery register group (default:DEFAULT_GROUP)
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/changgou_user?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true&serverTimezone=UTC
+    username: root
+    password: 123456
+  redis:
+    open: true
+    database: 5
+    host: 192.168.63.24 # 使用你的redis替换
+    port: 9017
+    password: Sjs.379=
+
+info:
+  version: 1.0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+ribbon:
+  ServerListRefreshInterval: 1000
+  OkToRetryOnAllOperations: true  #对超时请求启用重试机制
+  MaxAutoRetriesNextServer: 3 #切换重试实例的最大个数
+  MaxAutoRetries: 1     #切换实例后重试最大次数
+  ReadTimeout: 5000
+  ConnectTimeout: 3000
+  retryableStatusCodes: 404,500,503
+
+#IP限流(令牌桶)
+#  gateway:
+#    routes:
+#      filters:
+#        - StripPrefix=1
+#        - name: RequestRateLimiter #固定
+#          args:
+#            key-resolver: "#{@remoteAddrKeyResolver}"
+#            redis-rate-limiter.replenishRate: 1
+#            redis-rate-limiter.burstCapacity: 1
